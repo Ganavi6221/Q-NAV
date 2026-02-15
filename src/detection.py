@@ -1,13 +1,8 @@
-"""
-Q-Nav Object Detection Module
-Detects obstacles using YOLO AI
-"""
-
 import cv2
 import numpy as np
 from ultralytics import YOLO
 import torch
-
+"""Detects obstacles using YOLO AI model"""
 class DebrisDetector:
     """Detects space debris/obstacles"""
     
@@ -65,45 +60,50 @@ class DebrisDetector:
         return detections, annotated
     
     def calculate_risk(self, detections, frame_shape):
-        """
-        Calculate collision risk
-        
-        Returns:
-            risk_level: 'HIGH', 'MEDIUM', 'LOW', 'SAFE'
-            risk_score: 0-100
-        """
         if not detections:
             return 'SAFE', 0
         
         height, width = frame_shape[:2]
         center_x, center_y = width // 2, height // 2
-        
         max_risk = 0
         
         for det in detections:
             x1, y1, x2, y2 = det['bbox']
             
-            # Size score (bigger = more danger)
+            # 1. Size calculation (Percentage of screen occupied)
             size = ((x2 - x1) * (y2 - y1)) / (width * height)
-            size_score = size * 100
             
-            # Proximity score (center = more danger)
+            # NEW LOGIC: Size is weighted heavily. 
+            # If size is 0.3 (30% of screen), score becomes 90.
+            size_score = (size * 100) * 3 
+            
+            # 2. Proximity calculation (Distance from center)
             obj_x = (x1 + x2) / 2
             obj_y = (y1 + y2) / 2
             distance = np.sqrt((obj_x - center_x)**2 + (obj_y - center_y)**2)
             max_dist = np.sqrt(center_x**2 + center_y**2)
-            proximity_score = (1 - distance / max_dist) * 50
             
-            # Total risk
+            # NEW LOGIC: Flattened Proximity
+            # If it's in the inner 80% of the screen, it's a major threat.
+            if distance < (max_dist * 0.8):
+                proximity_score = 40 
+            else:
+                # Even on the edge, it's a threat, just slightly less immediate.
+                proximity_score = 20 
+            
+            # Total risk calculation
             risk = size_score + proximity_score
+            
+            # Cap the risk at 100
+            risk = min(risk, 100)
             max_risk = max(max_risk, risk)
         
-        # Classify risk level
-        if max_risk > 70:
+        # Classification thresholds
+        if max_risk >= 75:
             return 'HIGH', int(max_risk)
-        elif max_risk > 40:
+        elif max_risk >= 45:
             return 'MEDIUM', int(max_risk)
-        elif max_risk > 20:
+        elif max_risk >= 15:
             return 'LOW', int(max_risk)
         else:
             return 'SAFE', int(max_risk)
