@@ -209,7 +209,7 @@ class QNavSystem:
         # Title
         cv2.putText(panel, "Q-NAV SYSTEM", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-        y += line_h * 1.5
+        y = int(y + line_h * 1.5)
         
         # Collision Risk
         risk_colors = {
@@ -222,41 +222,41 @@ class QNavSystem:
         
         cv2.putText(panel, "COLLISION RISK:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         cv2.putText(panel, f"{risk_level} ({risk_score}/100)", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
-        y += line_h * 1.2
+        y = int(y + line_h * 1.2)
         
         # Position
         cv2.putText(panel, "POSITION:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         cv2.putText(panel, f"({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f})", 
                    (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 255, 100), 1)
-        y += line_h * 1.2
+        y = int(y + line_h * 1.2)
         
         # Velocity
         speed = np.linalg.norm(vel)
         cv2.putText(panel, "VELOCITY:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         cv2.putText(panel, f"{speed:.2f} m/s", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 255, 100), 1)
-        y += line_h * 1.2
+        y = int(y + line_h * 1.2)
         
         # Target Distance
         distance = np.linalg.norm(self.target_position - pos)
         cv2.putText(panel, "TARGET DISTANCE:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         cv2.putText(panel, f"{distance:.1f} m", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 255, 100), 1)
-        y += line_h * 1.2
+        y = int(y + line_h * 1.2)
         
         # Navigation Status
         cv2.putText(panel, "STATUS:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         
         # Color code quantum mode
         if "QUANTUM" in status:
@@ -270,21 +270,21 @@ class QNavSystem:
         
         cv2.putText(panel, status, (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, status_color, 1)
-        y += line_h * 1.2
+        y = int(y + line_h * 1.2)
         
         # Collision Warning
         cv2.putText(panel, "COLLISION:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         
         warning_color = (0, 0, 255) if "⚠️" in collision_warning else (0, 255, 0)
         cv2.putText(panel, collision_warning, (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, warning_color, 1)
-        y += line_h * 1.5
+        y = int(y + line_h * 1.5)
         
         # Divider
         cv2.line(panel, (10, y), (390, y), (100, 100, 100), 1)
-        y += line_h
+        y = int(y + line_h)
         
         # Quantum Mode Indicator
         if self.quantum_nav.quantum_active:
@@ -293,12 +293,12 @@ class QNavSystem:
         else:
             cv2.putText(panel, "CLASSICAL MODE", (10, y),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 255, 100), 1)
-        y += line_h * 1.5
+        y = int(y + line_h * 1.5)
         
         # Statistics
         cv2.putText(panel, "STATISTICS:", (10, y),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
-        y += 25
+        y = int(y + 25)
         
         stats = [
             f"Frames: {self.frames_processed}",
@@ -310,7 +310,7 @@ class QNavSystem:
         for stat in stats:
             cv2.putText(panel, stat, (10, y),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (150, 150, 150), 1)
-            y += 22
+            y = int(y + 22)
         
         # Combine display
         display = np.hstack([annotated, panel])
