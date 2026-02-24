@@ -22,9 +22,6 @@ class QNavSystem:
     """
     
     def __init__(self):
-        print("\n" + "="*60)
-        print("🚀 INITIALIZING Q-NAV SYSTEM")
-        print("="*60 + "\n")
         
         # Initialize all subsystems
         print("Loading subsystems...")
@@ -47,6 +44,11 @@ class QNavSystem:
         # Mode change tracking for visual feedback
         self.last_mode = "classical"
         self.mode_change_frame = 0
+        
+        # Sensor health (controlled by user, not random!)
+        self.sensor_health = 1.0  # Start at 100% healthy
+        self.auto_degrade = False  # Manual mode by default
+        self.degradation_rate = 0.005  # How fast sensors degrade in auto mode
         
         # Set navigator target
         self.navigator.set_target(self.target_position)
@@ -105,6 +107,7 @@ class QNavSystem:
         
         Args:
             dt: Time step (seconds)
+
             
         Returns:
             position, velocity, status, collision_warning
@@ -114,11 +117,13 @@ class QNavSystem:
             dt, self.detected_obstacles
         )
         
-        # Calculate sensor health (simulate degradation)
-        sensor_health = np.random.uniform(0.7, 1.0)
+        # Auto degradation mode (if enabled)
+        if self.auto_degrade:
+            self.sensor_health -= self.degradation_rate * dt
+            self.sensor_health = max(0.0, self.sensor_health)  # Don't go below 0
         
-        # Check if quantum backup needed
-        quantum_active = self.quantum_nav.check_sensor_health(sensor_health)
+        # Use stored sensor health
+        quantum_active = self.quantum_nav.check_sensor_health(self.sensor_health)
         
         if quantum_active:
             self.quantum_activations += 1
@@ -182,21 +187,38 @@ class QNavSystem:
         flash = (self.frames_processed % 10 < 5) if is_flashing else False
         
         if self.quantum_nav.quantum_active:
-            # QUANTUM MODE - Purple banner at top
-            color = (255, 255, 255) if flash else (128, 0, 128)
-            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 80), 
-                         color if flash else (128, 0, 128), -1)
-            cv2.putText(annotated, "QUANTUM MODE ACTIVE", 
-                       (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.4, 
-                       (128, 0, 128) if flash else (255, 255, 255), 4)
+            # QUANTUM MODE - BRIGHT Purple/Magenta banner
+            bg_color = (255, 255, 0) if flash else (200, 0, 200)  # Brighter!
+            text_color = (255, 255, 255)  # Always white
+            
+            # Draw thick border
+            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 100), 
+                         bg_color, -1)
+            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 100), 
+                         (255, 255, 255), 5)
+            
+            # Big text
+            cv2.putText(annotated, "QUANTUM MODE", 
+                       (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.5, 
+                       text_color, 4)
+            cv2.putText(annotated, "ACTIVE", 
+                       (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.5, 
+                       text_color, 4)
         else:
-            # CLASSICAL MODE - Green banner at top
-            color = (255, 255, 255) if flash else (0, 150, 0)
-            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 70), 
-                         color if flash else (0, 150, 0), -1)
+            # CLASSICAL MODE - BRIGHT Green banner
+            bg_color = (255, 255, 0) if flash else (0, 200, 0)  # Brighter!
+            text_color = (255, 255, 255)  # Always white
+            
+            # Draw thick border
+            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 80), 
+                         bg_color, -1)
+            cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 80), 
+                         (255, 255, 255), 5)
+            
+            # Big text
             cv2.putText(annotated, "CLASSICAL MODE", 
-                       (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 1.2, 
-                       (0, 150, 0) if flash else (255, 255, 255), 3)
+                       (20, 55), cv2.FONT_HERSHEY_SIMPLEX, 1.4, 
+                       text_color, 4)
         
         # Create info panel
         height, width = annotated.shape[:2]
@@ -327,8 +349,9 @@ class QNavSystem:
         print("🎥 Starting Q-Nav live operation...")
         print("Controls:")
         print("  'q' - Quit")
-        print("  's' - Simulate sensor failure")
+        print("  's' - Simulate sensor failure (manual)")
         print("  'r' - Restore sensors")
+        print("  'a' - Toggle AUTO degradation mode")
         print("  't' - Change target\n")
         
         cap = cv2.VideoCapture(camera_id)
@@ -372,6 +395,9 @@ class QNavSystem:
                 # Keyboard controls
                 key = cv2.waitKey(1) & 0xFF
                 
+                if key != 255:  # 255 means no key pressed
+                    print(f"Key pressed: {key} ('{chr(key) if 32 <= key < 127 else '?'}')")
+                
                 if key == ord('q'):
                     print("\n👋 Quitting Q-Nav...")
                     break
@@ -379,14 +405,30 @@ class QNavSystem:
                     print("\n" + "="*50)
                     print("⚠️  SIMULATING SENSOR FAILURE")
                     print("="*50)
-                    self.quantum_nav.check_sensor_health(0.1)
+                    self.sensor_health = 0.1  # Set to 10% (triggers quantum!)
+                    self.quantum_nav.check_sensor_health(self.sensor_health)
                     print("Watch the display - should show QUANTUM MODE!\n")
                 elif key == ord('r'):
                     print("\n" + "="*50)
                     print("✓ RESTORING SENSORS")
                     print("="*50)
-                    self.quantum_nav.check_sensor_health(1.0)
+                    self.sensor_health = 1.0  # Set to 100% (healthy!)
+                    self.quantum_nav.check_sensor_health(self.sensor_health)
                     print("Watch the display - should show CLASSICAL MODE!\n")
+                elif key == ord('a'):
+                    # Toggle auto degradation
+                    self.auto_degrade = not self.auto_degrade
+                    if self.auto_degrade:
+                        print("\n" + "="*50)
+                        print("🤖 AUTO DEGRADATION ENABLED")
+                        print("="*50)
+                        print("Sensors will gradually degrade over time...")
+                        print("Quantum will auto-activate when health < 50%\n")
+                    else:
+                        print("\n" + "="*50)
+                        print("✋ AUTO DEGRADATION DISABLED")
+                        print("="*50)
+                        print("Back to manual control (use 's' and 'r')\n")
                 elif key == ord('t'):
                     # Random new target
                     old_target = self.target_position.copy()
@@ -425,7 +467,7 @@ class QNavSystem:
 def main():
     """Main entry point"""
     print("\n" + "="*60)
-    print("    🚀 Q-NAV: QUANTUM NAVIGATION SYSTEM 🚀")
+    print("     Q-NAV: QUANTUM NAVIGATION SYSTEM ")
     print("         Autonomous Spacecraft Navigation")
     print("="*60)
     
