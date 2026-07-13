@@ -76,17 +76,21 @@ Webcam (for live demo)
 GPU recommended (optional, runs on CPU)
 
 ## System Architecture
-
-
-│   Camera    │──→ YOLOv8 Detection ──→ Obstacle List
-                              ↓
-
-│ IMU Sensor  │──→ Sensor Fusion ────→ │Navigator│
-                               ↓                 
-                    Position/              
-│   LiDAR     │──→  Velocity          Path Planning
-        ↓                   ↓
-                    Health Monitor  --> Safe Trajectory
-                       ↓
-              < 50% Health? ──→ Quantum Backup ⚛️
+┌─────────────┐
+│   Camera    │──▶ YOLOv8 Detection ──▶ Obstacle List ──┐
+└─────────────┘                                          │
+                                                          ▼
+┌─────────────┐                                    ┌───────────┐
+│  IMU Sensor │──┐                                  │ Navigator │──▶ Path Planning ──▶ Safe Trajectory
+└─────────────┘  │                                  └───────────┘
+                 ▼                                        │
+┌─────────────┐  Sensor Fusion ──▶ Position/Velocity ──────┘
+│   LiDAR     │──┘                        
+└─────────────┘                           
+                                           ┌────────────────┐
+                     Navigator ──────────▶ │ Health Monitor │
+                                           └────────────────┘
+                                                    │
+                                                    ▼
+                                          < 50% Health? ──Yes──▶ ⚛️ Quantum Backup
 
