@@ -1,3 +1,4 @@
+
 ## Q-Nav 
 Q-Nav is an AI-powered autonomous navigation system designed for spacecraft operating in GPS-denied environments. When classical sensors fail due to radiation, thermal stress, or mechanical wear, Q-Nav's quantum-inspired backup system automatically activates, providing 100-1000x more precise navigation to ensure mission success.
 Key Innovation: First implementation of quantum-classical hybrid navigation for space applications, combining real-time AI object detection with quantum-enhanced sensor fusion.
