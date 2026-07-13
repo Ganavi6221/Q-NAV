@@ -75,7 +75,8 @@ Webcam (for live demo)
 4GB RAM minimum
 GPU recommended (optional, runs on CPU)
 
-System Architecture
+## System Architecture
+
 ┌─────────────┐
 │   Camera    │──→ YOLOv8 Detection ──→ Obstacle List
 └─────────────┘                              ↓
