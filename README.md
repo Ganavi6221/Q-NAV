@@ -1,25 +1,25 @@
-##Q-Nav 
+## Q-Nav 
 Q-Nav is an AI-powered autonomous navigation system designed for spacecraft operating in GPS-denied environments. When classical sensors fail due to radiation, thermal stress, or mechanical wear, Q-Nav's quantum-inspired backup system automatically activates, providing 100-1000x more precise navigation to ensure mission success.
 Key Innovation: First implementation of quantum-classical hybrid navigation for space applications, combining real-time AI object detection with quantum-enhanced sensor fusion.
 
 ✨ Features
 🎯 Core Capabilities
 
-##Real-Time Obstacle Detection
+Real-Time Obstacle Detection
 
 YOLOv8 AI detects space debris, asteroids, and obstacles at 30+ fps
 Automatic collision risk assessment (SAFE/LOW/MEDIUM/HIGH)
 Processes live camera feed with sub-second latency
 
 
-##Multi-Sensor Fusion
+## Multi-Sensor Fusion
 
 Integrates IMU (acceleration/rotation), LiDAR (3D distance), and camera data
 Kalman filter-based state estimation
 Redundant sensor architecture for reliability
 
 
-##Intelligent Path Planning
+## Intelligent Path Planning
 
 Dynamic collision-free trajectory calculation
 Real-time obstacle avoidance
@@ -44,7 +44,7 @@ Flashing visual alerts for mode changes
 One-click quantum activation/restoration
 Full-screen optimized layout
  
-##Technology Stack
+## Technology Stack
 AI/ML Framework:
 
 PyTorch 2.0+
